@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy New Year 2026</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: #fff;
+            overflow: hidden;
+            background: url("image.jpg") center center / cover no-repeat fixed;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at top, rgba(255,255,255,0.18), transparent 55%)
+                        ,rgba(0,0,0,0.55);
+        }
+
+        .card {
+            position: relative;
+            max-width: 780px;
+            width: 92%;
+            padding: 28px 24px 30px;
+            border-radius: 22px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.03));
+            border: 1px solid rgba(255,255,255,0.42);
+            box-shadow: 0 18px 55px rgba(0,0,0,0.7);
+            backdrop-filter: blur(16px) saturate(170%);
+            -webkit-backdrop-filter: blur(16px) saturate(170%);
+        }
+
+        h1 {
+            font-size: 2.4em;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.85);
+        }
+
+        .message-main {
+            font-size: 1.05em;
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+
+        .countdown {
+            font-size: 1.25em;
+            margin-top: 14px;
+            margin-bottom: 6px;
+        }
+
+        .fireworks-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="fireworks-layer" id="fireworks"></div>
+
+    <div class="card">
+        <h1>HAPPY NEW YEAR FROM SOUMALYA BHATTACHARYA</h1>
+
+        <div class="message-main">
+            Happy New Year to you and your family! May your home stay filled with laughter,
+            comfort, and love, and may this year give you strength to overcome challenges
+            and courage to chase your dreams.
+        </div>
+
+        <div class="countdown" id="countdownText">
+            New Year starts in: <span id="timer">5</span>s
+        </div>
+    </div>
+
+    <!-- Background song (loop) -->
+    <audio id="bgSong" src="song.mp3" loop preload="auto"></audio>
+
+    <!-- Firework burst sound -->
+    <audio id="burstSound" src="burst.mp3" preload="auto"></audio>
+
+    <script>
+        let time = 5;
+        const timerEl = document.getElementById("timer");
+        const countdownText = document.getElementById("countdownText");
+        const bgSong = document.getElementById("bgSong");
+        const burstSound = document.getElementById("burstSound");
+
+        // Start after first click (unlocks audio)
+        document.body.addEventListener("click", startCountdown, { once: true });
+
+        function startCountdown() {
+            bgSong.play().catch(() => {});
+
+            const countdown = setInterval(() => {
+                time--;
+                if (time >= 0) timerEl.textContent = time;
+                if (time <= 0) {
+                    clearInterval(countdown);
+                    countdownText.textContent = "🎇 Happy New Year! 🎇";
+                    startRocketShow();
+                }
+            }, 1000);
+        }
+
+        function startRocketShow() {
+            setInterval(() => {
+                launchRocket();
+            }, 400);
+        }
+
+        function launchRocket() {
+            const layer = document.getElementById("fireworks");
+            const rocket = document.createElement("img");
+            const x = Math.random() * 100;
+
+            rocket.src = "rocket.png";        // your rocket image file
+            rocket.style.position = "fixed";
+            rocket.style.left = x + "vw";
+            rocket.style.bottom = "0vh";
+            rocket.style.width = "32px";
+            rocket.style.pointerEvents = "none";
+
+            layer.appendChild(rocket);
+
+            const flightHeight = Math.random() * 40 + 35;
+
+            const fly = rocket.animate(
+                [
+                    { transform: "translateY(0)", opacity: 1 },
+                    { transform: `translateY(-${flightHeight}vh)`, opacity: 1 }
+                ],
+                { duration: 800 + Math.random() * 250, easing: "ease-out" }
+            );
+
+            fly.onfinish = () => {
+                const rect = rocket.getBoundingClientRect();
+                rocket.remove();
+                explode(rect.left + rect.width / 2, rect.top);
+            };
+        }
+
+        // Explosion with splash + glitter
+        function explode(screenX, screenY) {
+            const layer = document.getElementById("fireworks");
+            const numParticles = 26;
+
+            // play burst sound
+            burstSound.currentTime = 0;
+            burstSound.play().catch(() => {});
+
+            // Splash ring
+            const splash = document.createElement("div");
+            splash.style.position = "fixed";
+            splash.style.left = (screenX - 25) + "px";
+            splash.style.top = (screenY - 25) + "px";
+            splash.style.width = "50px";
+            splash.style.height = "50px";
+            splash.style.borderRadius = "50%";
+            splash.style.border = "3px solid rgba(255,255,255,0.9)";
+            splash.style.boxShadow = "0 0 25px rgba(255,255,255,0.95)";
+            splash.style.pointerEvents = "none";
+            layer.appendChild(splash);
+
+            splash.animate(
+                [
+                    { transform: "scale(0.4)", opacity: 1 },
+                    { transform: "scale(1.6)", opacity: 0 }
+                ],
+                { duration: 350, easing: "ease-out" }
+            ).onfinish = () => splash.remove();
+
+            // Main burst + glitter
+            for (let i = 0; i < numParticles; i++) {
+                const p = document.createElement("div");
+                const size = Math.random() * 5 + 3;
+
+                p.style.position = "fixed";
+                p.style.left = screenX + "px";
+                p.style.top = screenY + "px";
+                p.style.width = size + "px";
+                p.style.height = size + "px";
+                p.style.borderRadius = "50%";
+                p.style.background = `hsl(${Math.random() * 360}, 100%, 65%)`;
+                p.style.boxShadow = "0 0 10px rgba(255,255,255,0.9)";
+                p.style.pointerEvents = "none";
+                layer.appendChild(p);
+
+                const angle = (Math.PI * 2 * i) / numParticles;
+                const distance = Math.random() * 120 + 60;
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance;
+
+                p.animate(
+                    [
+                        { transform: "translate(0,0) scale(1)", opacity: 1 },
+                        { transform: `translate(${dx}px, ${dy}px) scale(0.1)`, opacity: 0 }
+                    ],
+                    { duration: 1000 + Math.random() * 500, easing: "ease-out" }
+                ).onfinish = () => p.remove();
+
+                // Glitter spark
+                const g = document.createElement("div");
+                g.style.position = "fixed";
+                g.style.left = screenX + "px";
+                g.style.top = screenY + "px";
+                g.style.width = "2px";
+                g.style.height = "2px";
+                g.style.borderRadius = "50%";
+                g.style.background = "#ffffff";
+                g.style.boxShadow = "0 0 6px rgba(255,255,255,1)";
+                g.style.pointerEvents = "none";
+                layer.appendChild(g);
+
+                g.animate(
+                    [
+                        { transform: "translate(0,0)", opacity: 0 },
+                        { transform: `translate(${dx * 0.7}px, ${dy * 0.7}px)`, opacity: 1 },
+                        { transform: `translate(${dx * 0.9}px, ${dy * 0.9}px)`, opacity: 0 }
+                    ],
+                    { duration: 900 + Math.random() * 400, easing: "ease-out", delay: 120 }
+                ).onfinish = () => g.remove();
+            }
+        }
+    </script>
+</body>
+</html>
+
